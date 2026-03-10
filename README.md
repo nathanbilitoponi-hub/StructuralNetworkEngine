@@ -1,56 +1,75 @@
-\# Structural Network Engine
+# Structural Network Engine
 
+Structural Network Engine is a computational framework for extracting structural networks from spatial point cloud datasets.
 
+The engine identifies and reconstructs:
 
-Structural Network Engine is a framework for extracting structural networks from spatial point cloud datasets.
+- structural trunks
+- backbone networks
+- topological nodes
+- branching structures
+- multi-scale connectivity graphs
 
+The system is designed to work with very large datasets including:
 
+- cosmological galaxy surveys
+- LiDAR point clouds
+- geospatial datasets
+- infrastructure networks
 
-The engine detects:
+---
 
+## Example Applications
 
+Structural Network Engine can be applied to:
 
-• structural backbones  
+- Cosmic web reconstruction
+- Urban infrastructure analysis
+- Geological fracture networks
+- River and drainage systems
+- Biological vascular networks
 
-• structural hubs  
+---
 
-• persistent network paths  
+## Web Platform
 
-• multiscale network structures  
+A web interface allows users to upload datasets and run the structural detection algorithm.
 
+Features:
 
+- user accounts
+- credit-based processing
+- Stripe payment integration
+- dataset upload
+- automated structural extraction
 
-Originally developed for cosmic web detection in galaxy surveys, the architecture is designed to work with any spatial dataset.
+---
 
+## Architecture
 
+backend/
+server.py
+algorithm.py
+db.py
 
-\## Hosted Platform
+frontend/
+index.html
+login.html
+register.html
+analysis.html
 
+jobs/
+processing jobs
+---
 
+## Vision
 
-Users can upload datasets, run structural analysis, and download network results through the hosted platform.
+The goal of Structural Network Engine is to provide a **universal structural extraction engine** capable of identifying networks hidden inside large spatial datasets.
 
+---
 
+## Status
 
-\## Applications
+Early prototype.
 
-
-
-\- Cosmology
-
-\- Geospatial analysis
-
-\- Infrastructure networks
-
-\- Biological systems
-
-\- Digital twin modeling
-
-
-
-\## Author
-
-
-
-Nathan Bili Toponi
-
+Currently being tested on cosmological datasets (SDSS).
