@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Structural Network Engine</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .topbar {
+            background: #1d2a3a;
+            color: white;
+            padding: 14px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .userbox,
+        .creditbox {
+            font-size: 14px;
+        }
+
+        .credit-value {
+            font-weight: bold;
+        }
+
+        .buy-btn {
+            background: #18a957;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .buy-btn:hover {
+            background: #128847;
+        }
+
+        .logout {
+            background: #ff4c4c;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .container {
+            width: 1100px;
+            margin: auto;
+            margin-top: 30px;
+            margin-bottom: 40px;
+        }
+
+        .box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 18px;
+            background: #2b7cff;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1f5fd1;
+        }
+
+        button:disabled {
+            background: #9aa7bd;
+            cursor: not-allowed;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #e3e6ee;
+            padding: 10px;
+        }
+
+        th {
+            background: #f2f5fb;
+            text-align: left;
+        }
+
+        .smallbtn {
+            padding: 6px 12px;
+            font-size: 13px;
+            margin-right: 8px;
+        }
+
+        .share {
+            background: #18a957;
+        }
+
+        .share:hover {
+            background: #128847;
+        }
+
+        svg {
+            background: white;
+            border: 1px solid #ddd;
+        }
+
+        #status,
+        #purchaseStatus {
+            margin-top: 14px;
+            min-height: 22px;
+            line-height: 1.4;
+        }
+
+        .warning {
+            color: #c0392b;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        .muted {
+            color: #666;
+        }
+
+        .download-links a {
+            display: inline-block;
+            margin-right: 16px;
+            margin-bottom: 8px;
+            color: #2b7cff;
+            text-decoration: none;
+        }
+
+        .download-links a:hover {
+            text-decoration: underline;
+        }
+
+        .package-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .package-card {
+            border: 1px solid #dfe3ea;
+            border-radius: 8px;
+            padding: 16px;
+            background: #fafbfd;
+        }
+
+        .package-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .package-price {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <div class="brand">Structural Network Engine</div>
+
+        <div class="topbar-right">
+            <div class="userbox">
+                User: <span id="usernameLabel"></span>
+            </div>
+
+            <div class="creditbox">
+                Credits remaining:
+                <span id="creditsLabel" class="credit-value">0</span>
+            </div>
+
+            <button class="buy-btn" onclick="toggleBuyCredits()">Buy Credits</button>
+            <button class="logout" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <div class="box" id="buyCreditsBox" style="display:none;">
+            <div class="title">Buy Credits</div>
+
+            <div class="package-grid">
+                <div class="package-card">
+                    <div class="package-name">10 credits</div>
+                    <div class="package-price">10€</div>
+                    <button onclick="buyCredits('pack_10')">Buy 10 credits</button>
+                </div>
+
+                <div class="package-card">
+                    <div class="package-name">50 credits</div>
+                    <div class="package-price">40€</div>
+                    <button onclick="buyCredits('pack_50')">Buy 50 credits</button>
+                </div>
+
+                <div class="package-card">
+                    <div class="package-name">100 credits</div>
+                    <div class="package-price">70€</div>
+                    <button onclick="buyCredits('pack_100')">Buy 100 credits</button>
+                </div>
+            </div>
+
+            <div id="purchaseStatus" class="muted"></div>
+        </div>
+
+        <div class="box">
+            <div class="title">Run Analysis</div>
+
+            <input type="file" id="file">
+            <br><br>
+
+            <button id="runButton" onclick="runAnalysis()">Run Algorithm</button>
+
+            <div id="creditWarning" class="warning" style="display:none;">
+                No credits remaining. You cannot run a new analysis.
+            </div>
+
+            <div id="status" class="muted"></div>
+        </div>
+
+        <div class="box" id="jobBox" style="display:none">
+            <div class="title">Analysis</div>
+
+            <div><b>ID:</b> <span id="jobId"></span></div>
+            <div><b>Date:</b> <span id="jobDate"></span></div>
+            <div><b>Input:</b> <span id="jobInput"></span></div>
+            <div><b>Share Link:</b> <span id="jobLink"></span></div>
+        </div>
+
+        <div class="box">
+            <div class="title">Results</div>
+
+            <table>
+                <tbody id="resultsTable">
+                    <tr>
+                        <th>Status</th>
+                        <td>No analysis yet</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="box">
+            <div class="title">Download</div>
+            <div class="download-links">
+                <a id="downloadNodes" href="#" target="_blank">Nodes CSV</a>
+                <a id="downloadEdges" href="#" target="_blank">Edges CSV</a>
+                <a id="downloadReport" href="#" target="_blank">Report JSON</a>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="title">Network Graph</div>
+            <svg id="graph" width="600" height="400"></svg>
+        </div>
+
+        <div class="box">
+            <div class="title">Recent Analyses</div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Input</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="jobsTable">
+                    <tr>
+                        <td colspan="4">No jobs</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        let simulation = null;
+        let currentCredits = 0;
+
+        async function checkUser() {
+            const res = await fetch("/api/me");
+            const data = await res.json();
+
+            if (!data.authenticated) {
+                window.location = "/login";
+                return;
+            }
+
+            document.getElementById("usernameLabel").innerText = data.user.username;
+            updateCreditsUI(data.user.credits);
+        }
+
+        function updateCreditsUI(credits) {
+            currentCredits = Number(credits || 0);
+            document.getElementById("creditsLabel").innerText = currentCredits;
+
+            const runButton = document.getElementById("runButton");
+            const creditWarning = document.getElementById("creditWarning");
+
+            if (currentCredits <= 0) {
+                runButton.disabled = true;
+                creditWarning.style.display = "block";
+            } else {
+                runButton.disabled = false;
+                creditWarning.style.display = "none";
+            }
+        }
+
+        function toggleBuyCredits() {
+            const box = document.getElementById("buyCreditsBox");
+            box.style.display = box.style.display === "none" ? "block" : "none";
+        }
+
+        async function buyCredits(packageCode) {
+            const status = document.getElementById("purchaseStatus");
+            status.innerText = "Creating Stripe Checkout session...";
+
+            try {
+                const res = await fetch("/api/create-checkout-session", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        package_code: packageCode
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    status.innerText = data.detail || "Unable to create checkout session.";
+                    return;
+                }
+
+                if (!data.checkout_url) {
+                    status.innerText = "Stripe checkout URL not received.";
+                    return;
+                }
+
+                window.location.href = data.checkout_url;
+            } catch (e) {
+                status.innerText = "Network error while creating checkout session.";
+            }
+        }
+
+        async function logout() {
+            await fetch("/api/logout", { method: "POST" });
+            window.location = "/login";
+        }
+
+        async function runAnalysis() {
+            const file = document.getElementById("file").files[0];
+            const status = document.getElementById("status");
+
+            if (currentCredits <= 0) {
+                status.innerText = "No credits remaining. You cannot run a new analysis.";
+                updateCreditsUI(0);
+                return;
+            }
+
+            if (!file) {
+                alert("Select file first");
+                return;
+            }
+
+            status.innerText = "Running analysis...";
+
+            const form = new FormData();
+            form.append("file", file);
+
+            const res = await fetch("/run", {
+                method: "POST",
+                body: form
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                status.innerText = data.detail || data.error || "Analysis failed.";
+                if (res.status === 403) {
+                    updateCreditsUI(0);
+                }
+                return;
+            }
+
+            renderJob(data);
+            renderResults(data);
+            drawGraph(data.nodes, data.links);
+            loadJobs();
+
+            if (typeof data.remaining_credits !== "undefined") {
+                updateCreditsUI(data.remaining_credits);
+            } else {
+                await refreshCredits();
+            }
+
+            status.innerText = "Analysis completed successfully.";
+        }
+
+        async function refreshCredits() {
+            const res = await fetch("/api/me");
+            const data = await res.json();
+
+            if (data.authenticated) {
+                updateCreditsUI(data.user.credits);
+            }
+        }
+
+        async function handleCheckoutReturn() {
+            const params = new URLSearchParams(window.location.search);
+            const checkout = params.get("checkout");
+            const purchaseStatus = document.getElementById("purchaseStatus");
+
+            if (!checkout) {
+                return;
+            }
+
+            document.getElementById("buyCreditsBox").style.display = "block";
+
+            if (checkout === "cancel") {
+                purchaseStatus.innerText = "Payment canceled.";
+                window.history.replaceState({}, document.title, "/");
+                return;
+            }
+
+            if (checkout === "success") {
+                purchaseStatus.innerText = "Payment completed. Updating credits...";
+
+                for (let i = 0; i < 6; i++) {
+                    await refreshCredits();
+                    await new Promise(resolve => setTimeout(resolve, 1200));
+                }
+
+                purchaseStatus.innerText = "Credits updated.";
+                window.history.replaceState({}, document.title, "/");
+            }
+        }
+
+        function renderJob(data) {
+            document.getElementById("jobBox").style.display = "block";
+
+            document.getElementById("jobId").innerText = data.job_id;
+            document.getElementById("jobDate").innerText = data.created_at;
+            document.getElementById("jobInput").innerText = data.input_file;
+
+            const url = location.origin + "/analysis/" + data.job_id;
+            document.getElementById("jobLink").innerText = url;
+
+            document.getElementById("downloadNodes").href = data.downloads.nodes;
+            document.getElementById("downloadEdges").href = data.downloads.edges;
+            document.getElementById("downloadReport").href = data.downloads.report;
+        }
+
+        function renderResults(data) {
+            const m = data.metrics;
+
+            const rows = [
+                ["File", m.file],
+                ["Rows", m.rows],
+                ["Columns", m.columns],
+                ["Valid Points", m.valid_points],
+                ["Network Sample", m.network_sample],
+                ["Edges", m.edges],
+                ["Mean Degree", m.mean_degree],
+                ["Max Degree", m.max_degree],
+                ["Components", m.components],
+                ["Backbone Nodes", m.backbone_nodes]
+            ];
+
+            const tbody = document.getElementById("resultsTable");
+            tbody.innerHTML = "";
+
+            rows.forEach(r => {
+                const tr = document.createElement("tr");
+
+                const th = document.createElement("th");
+                th.innerText = r[0];
+
+                const td = document.createElement("td");
+                td.innerText = r[1];
+
+                tr.appendChild(th);
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            });
+        }
+
+        function drawGraph(nodes, links) {
+            const svg = d3.select("#graph");
+            svg.selectAll("*").remove();
+
+            if (simulation) simulation.stop();
+
+            simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(40))
+                .force("charge", d3.forceManyBody().strength(-90))
+                .force("center", d3.forceCenter(300, 200));
+
+            const link = svg.append("g")
+                .selectAll("line")
+                .data(links)
+                .enter()
+                .append("line")
+                .attr("stroke", "#aaa");
+
+            const node = svg.append("g")
+                .selectAll("circle")
+                .data(nodes)
+                .enter()
+                .append("circle")
+                .attr("r", d => d.backbone ? 6 : 4)
+                .attr("fill", d => d.backbone ? "#ff6b35" : "#2b7cff");
+
+            simulation.on("tick", () => {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                node
+                    .attr("cx", d => d.x)
+                    .attr("cy", d => d.y);
+            });
+        }
+
+        async function loadJobs() {
+            const res = await fetch("/jobs");
+            const data = await res.json();
+
+            const tbody = document.getElementById("jobsTable");
+            tbody.innerHTML = "";
+
+            if (!data.jobs || data.jobs.length === 0) {
+                const tr = document.createElement("tr");
+                const td = document.createElement("td");
+                td.colSpan = 4;
+                td.innerText = "No jobs";
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                return;
+            }
+
+            data.jobs.forEach(j => {
+                const tr = document.createElement("tr");
+
+                const id = document.createElement("td");
+                id.innerText = j.job_id;
+
+                const date = document.createElement("td");
+                date.innerText = j.created_at;
+
+                const input = document.createElement("td");
+                input.innerText = j.input_file;
+
+                const act = document.createElement("td");
+
+                const open = document.createElement("button");
+                open.innerText = "Open";
+                open.className = "smallbtn";
+                open.onclick = () => loadJob(j.job_id);
+
+                const share = document.createElement("button");
+                share.innerText = "Share";
+                share.className = "smallbtn share";
+                share.onclick = async () => {
+                    const url = location.origin + "/analysis/" + j.job_id;
+                    try {
+                        await navigator.clipboard.writeText(url);
+                        alert("Link copied");
+                    } catch (e) {
+                        alert(url);
+                    }
+                };
+
+                act.appendChild(open);
+                act.appendChild(share);
+
+                tr.appendChild(id);
+                tr.appendChild(date);
+                tr.appendChild(input);
+                tr.appendChild(act);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function loadJob(id) {
+            const res = await fetch("/job/" + id);
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.detail || "Unable to load job.");
+                return;
+            }
+
+            renderJob(data);
+            renderResults(data);
+            drawGraph(data.nodes, data.links);
+
+            if (typeof data.remaining_credits !== "undefined") {
+                updateCreditsUI(data.remaining_credits);
+            } else {
+                await refreshCredits();
+            }
+        }
+
+        checkUser();
+        loadJobs();
+        handleCheckoutReturn();
+    </script>
+
+</body>
+
+</html>
